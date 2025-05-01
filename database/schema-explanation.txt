@@ -1,0 +1,81 @@
+# Explication des tables du schéma pharmacie_db
+
+## 1. roles
+- Définit les rôles d'utilisateur (ex: Admin, Pharmacien).
+- Permet la gestion des permissions et des accès dans l'application.
+
+## 2. utilisateurs
+- Stocke les comptes utilisateurs (nom, email, mot de passe, rôle).
+- Permet la gestion des accès, de l'authentification et des actions selon le rôle.
+
+## 3. categories
+- Liste les catégories d'articles (ex: Antibiotiques, Vitamines).
+- Utilisé pour organiser et filtrer les articles/Produits.
+
+## 4. fournisseurs
+- Contient les informations sur les fournisseurs (nom, contact, email, etc.).
+- Permet de lier chaque article à un fournisseur et de gérer les commandes d'achat.
+
+## 5. clients
+- Stocke les informations des clients (nom, contact, etc.).
+- Permet d'associer des ventes à des clients et de gérer l'historique d'achat.
+
+## 6. articles
+- Représente les Produits/éléments vendus (nom, prix, catégorie, fournisseur).
+- Permet la gestion des articles, leur affichage, modification, et suppression.
+
+## 7. stock
+- Gère les niveaux de stock pour chaque article.
+- Permet de suivre les quantités disponibles, les alertes de stock bas, et les ajustements.
+
+## 8. commandes_achat
+- Représente les bons de commande envoyés aux fournisseurs.
+- Permet de gérer les achats, les réceptions de stock, et l'historique des commandes.
+
+## 9. details_commande_achat
+- Détaille les articles et quantités dans chaque commande d'achat.
+- Permet de savoir quels articles ont été commandés, à quel prix et en quelle quantité.
+
+## 10. ventes
+- Enregistre chaque transaction de vente (date, client, utilisateur, montant).
+- Permet de suivre l'historique des ventes, les totaux, et les rapports.
+
+## 11. details_vente
+- Détaille les articles vendus dans chaque vente (quantité, prix unitaire).
+- Permet d'analyser les ventes par article et de gérer les stocks.
+
+## 12. parametres
+- Stocke les paramètres généraux de l'application (nom pharmacie, devise, etc.).
+- Permet la configuration globale via l'interface d'administration.
+
+## 13. permissions
+- Définit les permissions spécifiques (ex: "gérer utilisateurs", "voir ventes").
+- Utilisé pour un contrôle d'accès fin par rôle.
+
+## 14. role_permissions
+- Fait le lien entre les rôles et les permissions.
+- Permet d'attribuer des droits précis à chaque rôle.
+
+## 15. Produits_categories
+- Table de liaison pour les articles appartenant à plusieurs catégories.
+- Permet une organisation flexible des articles.
+
+## 16. Produits_fournisseurs
+- Table de liaison pour les articles provenant de plusieurs fournisseurs.
+- Permet de gérer les multi-sources pour un même article.
+
+## 17. ajustements_stock
+- Historique des ajustements manuels de stock (ajout/retrait, raison, utilisateur).
+- Permet la traçabilité des modifications de stock.
+
+## 18. alertes
+- Gère les alertes système (stock bas, expiration, etc.).
+- Permet d'afficher des notifications et de suivre les actions sur les alertes.
+
+## 19. configurations_alertes
+- Paramétrage des seuils et notifications pour les alertes.
+- Permet de personnaliser les seuils de stock bas, délais d'expiration, etc.
+
+## 20. logs_audit
+- Historique des actions importantes réalisées par les utilisateurs.
+- Permet la traçabilité et la sécurité (qui a fait quoi et quand). 

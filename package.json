@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.4"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss-cli": "^11.0.1",
+    "tailwindcss": "^4.1.5"
+  },
+  "name": "pharmacy",
+  "description": "A comprehensive pharmacy management system built with PHP 8.1+, featuring inventory management, sales tracking, and customer management.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
