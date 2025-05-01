@@ -93,26 +93,33 @@
                                         <td class="px-4 py-2">
                                             <?php
                                             $statusClasses = [
-                                                'brouillon' => 'bg-gray-100 text-gray-700',
-                                                'envoyee' => 'bg-blue-100 text-blue-700',
-                                                'recue' => 'bg-green-100 text-green-700',
+                                                'en_attente' => 'bg-gray-100 text-gray-700',
+                                                'commandee' => 'bg-blue-100 text-blue-700',
+                                                'livree' => 'bg-green-100 text-green-700',
                                                 'annulee' => 'bg-red-100 text-red-700'
                                             ];
                                             $statusClass = $statusClasses[$commande['statut']] ?? 'bg-gray-100 text-gray-700';
+                                            
+                                            $statusLabels = [
+                                                'en_attente' => 'En attente',
+                                                'commandee' => 'Commandée',
+                                                'livree' => 'Livrée',
+                                                'annulee' => 'Annulée'
+                                            ];
                                             ?>
                                             <span class="<?= $statusClass ?> px-2 py-1 rounded-full text-xs">
-                                                <?= htmlspecialchars(ucfirst($commande['statut'])) ?>
+                                                <?= htmlspecialchars($statusLabels[$commande['statut']] ?? ucfirst($commande['statut'])) ?>
                                             </span>
                                         </td>
                                         <td class="px-4 py-2"><?= number_format((float)$commande['montant_total'], 0, ',', ' ') ?> DA</td>
                                         <td class="px-4 py-2 flex space-x-2">
                                             <a href="/commandes/view/<?= $commande['id'] ?>" class="text-blue-600 hover:underline">Voir</a>
-                                            <?php if ($commande['statut'] === 'brouillon'): ?>
-                                                <a href="/commandes/updateStatus/<?= $commande['id'] ?>/envoyee" class="text-blue-600 hover:underline">Envoyer</a>
-                                            <?php elseif ($commande['statut'] === 'envoyee'): ?>
-                                                <a href="/commandes/updateStatus/<?= $commande['id'] ?>/recue" class="text-green-600 hover:underline">Marquer reçue</a>
+                                            <?php if ($commande['statut'] === 'en_attente'): ?>
+                                                <a href="/commandes/updateStatus/<?= $commande['id'] ?>/commandee" class="text-blue-600 hover:underline">Confirmer</a>
+                                            <?php elseif ($commande['statut'] === 'commandee'): ?>
+                                                <a href="/commandes/updateStatus/<?= $commande['id'] ?>/livree" class="text-green-600 hover:underline">Réceptionner</a>
                                             <?php endif; ?>
-                                            <?php if ($commande['statut'] !== 'recue'): ?>
+                                            <?php if ($commande['statut'] !== 'livree'): ?>
                                                 <a href="/commandes/updateStatus/<?= $commande['id'] ?>/annulee" class="text-red-600 hover:underline" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">Annuler</a>
                                             <?php endif; ?>
                                         </td>

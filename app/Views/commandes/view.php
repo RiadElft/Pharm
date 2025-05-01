@@ -12,7 +12,7 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <?php require_once __DIR__ . '/../partials/sidebar.php'; ?>
+    <?php require_once __DIR__ . '/../../Views/partials/sidebar.php'; ?>
 
     <!-- Main Content Wrapper -->
     <div id="main-content" class="transition-all duration-300 ease-in-out ml-64">
@@ -43,7 +43,7 @@
                             <dl class="space-y-2">
                                 <div class="flex">
                                     <dt class="w-32 font-medium text-gray-500">Fournisseur:</dt>
-                                    <dd class="text-gray-900"><?= htmlspecialchars($commande['fournisseur_nom']) ?></dd>
+                                    <dd class="text-gray-900"><?= htmlspecialchars($commande['fournisseur_nom'] ?? 'Non spécifié') ?></dd>
                                 </div>
                                 <div class="flex">
                                     <dt class="w-32 font-medium text-gray-500">Date:</dt>
@@ -54,15 +54,23 @@
                                     <dd>
                                         <?php
                                         $statusClasses = [
-                                            'brouillon' => 'bg-gray-100 text-gray-700',
-                                            'envoyee' => 'bg-blue-100 text-blue-700',
-                                            'recue' => 'bg-green-100 text-green-700',
+                                            'en_attente' => 'bg-gray-100 text-gray-700',
+                                            'commandee' => 'bg-blue-100 text-blue-700',
+                                            'livree' => 'bg-green-100 text-green-700',
                                             'annulee' => 'bg-red-100 text-red-700'
                                         ];
                                         $statusClass = $statusClasses[$commande['statut']] ?? 'bg-gray-100 text-gray-700';
                                         ?>
                                         <span class="<?= $statusClass ?> px-2 py-1 rounded-full text-xs">
-                                            <?= htmlspecialchars(ucfirst($commande['statut'])) ?>
+                                            <?php
+                                            $statusLabels = [
+                                                'en_attente' => 'En attente',
+                                                'commandee' => 'Commandée',
+                                                'livree' => 'Livrée',
+                                                'annulee' => 'Annulée'
+                                            ];
+                                            echo htmlspecialchars($statusLabels[$commande['statut']] ?? ucfirst($commande['statut']));
+                                            ?>
                                         </span>
                                     </dd>
                                 </div>
@@ -77,16 +85,16 @@
                         <div>
                             <h2 class="text-lg font-semibold text-gray-800 mb-4">Actions</h2>
                             <div class="space-y-2">
-                                <?php if ($commande['statut'] === 'brouillon'): ?>
-                                    <a href="/commandes/updateStatus/<?= $commande['id'] ?>/envoyee" class="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                                        Envoyer la commande
+                                <?php if ($commande['statut'] === 'en_attente'): ?>
+                                    <a href="/commandes/updateStatus/<?= $commande['id'] ?>/commandee" class="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                                        Confirmer la commande
                                     </a>
-                                <?php elseif ($commande['statut'] === 'envoyee'): ?>
-                                    <a href="/commandes/updateStatus/<?= $commande['id'] ?>/recue" class="block w-full text-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                                        Marquer comme reçue
+                                <?php elseif ($commande['statut'] === 'commandee'): ?>
+                                    <a href="/commandes/updateStatus/<?= $commande['id'] ?>/livree" class="block w-full text-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                                        Confirmer la réception
                                     </a>
                                 <?php endif; ?>
-                                <?php if ($commande['statut'] !== 'recue'): ?>
+                                <?php if ($commande['statut'] !== 'livree'): ?>
                                     <a href="/commandes/updateStatus/<?= $commande['id'] ?>/annulee" 
                                        onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')"
                                        class="block w-full text-center bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
@@ -118,7 +126,7 @@
                                         $total += $sousTotal;
                                     ?>
                                         <tr>
-                                            <td class="px-4 py-2"><?= htmlspecialchars($detail['article_nom']) ?></td>
+                                            <td class="px-4 py-2"><?= htmlspecialchars($detail['produit_nom'] ?? 'Produit inconnu') ?></td>
                                             <td class="px-4 py-2 text-right"><?= htmlspecialchars($detail['quantite']) ?></td>
                                             <td class="px-4 py-2 text-right"><?= number_format($detail['prix_unitaire'], 0, ',', ' ') ?> DA</td>
                                             <td class="px-4 py-2 text-right"><?= number_format($sousTotal, 0, ',', ' ') ?> DA</td>

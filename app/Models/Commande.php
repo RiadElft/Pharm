@@ -80,4 +80,17 @@ class Commande extends BaseModel
             'statut' => $status
         ]);
     }
+
+    public function findById(int $id): ?array
+    {
+        $query = "SELECT ca.*, f.nom as fournisseur_nom, u.nom as utilisateur_nom
+                  FROM {$this->table} ca
+                  JOIN fournisseurs f ON ca.fournisseur_id = f.id
+                  JOIN utilisateurs u ON ca.utilisateur_id = u.id
+                  WHERE ca.id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch();
+        return $result ?: null;
+    }
 } 

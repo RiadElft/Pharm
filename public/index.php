@@ -192,6 +192,10 @@ try {
             $controller = new \App\Controllers\FournisseurController();
             $controller->create();
             break;
+        case 'fournisseurs/store':
+            $controller = new \App\Controllers\FournisseurController();
+            $controller->create();  // The create method handles both GET and POST
+            break;
         case (preg_match('/^fournisseurs\/edit\/(\d+)$/', $path, $matches) ? true : false):
             $controller = new \App\Controllers\FournisseurController();
             $controller->edit((int)$matches[1]);
@@ -239,6 +243,14 @@ try {
         case (preg_match('/^commandes\/getProductsBySupplier\/(\d+)$/', $path, $matches) ? true : false):
             $controller = new \App\Controllers\CommandeController();
             $controller->getProductsBySupplier((int)$matches[1]);
+            break;
+        case (preg_match('/^commandes\/updateStatus\/(\d+)\/([a-z]+)$/', $path, $matches) ? true : false):
+            $controller = new \App\Controllers\CommandeController();
+            $controller->updateStatus((int)$matches[1], $matches[2]);
+            break;
+        case (preg_match('/^commandes\/view\/(\d+)$/', $path, $matches) ? true : false):
+            $controller = new \App\Controllers\CommandeController();
+            $controller->view((int)$matches[1]);
             break;
         case 'stock':
             error_log("Accessing stock route");

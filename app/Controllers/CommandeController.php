@@ -51,7 +51,7 @@ final class CommandeController
                         'fournisseur_id' => (int)$_POST['fournisseur_id'],
                         'utilisateur_id' => $userId,
                         'date_commande' => date('Y-m-d'),
-                        'statut' => 'brouillon',
+                        'statut' => 'en_attente',
                         'notes' => $_POST['notes'] ?? null
                     ];
 
@@ -182,14 +182,20 @@ final class CommandeController
 
     public function updateStatus(int $id, string $status): void
     {
-        if (!in_array($status, ['brouillon', 'envoyee', 'recue', 'annulee'])) {
+        if (!in_array($status, ['en_attente', 'commandee', 'livree', 'annulee'])) {
             $_SESSION['error'] = 'Statut invalide.';
             header('Location: /commandes');
             exit;
         }
 
-        $this->commandeModel->updateStatus($id, $status);
-        header('Location: /commandes');
+        try {
+            $this->commandeModel->updateStatus($id, $status);
+            $_SESSION['success'] = 'Statut de la commande mis à jour avec succès.';
+        } catch (\Exception $e) {
+            $_SESSION['error'] = 'Erreur lors de la mise à jour du statut: ' . $e->getMessage();
+        }
+        
+        header('Location: /commandes/view/' . $id);
         exit;
     }
 

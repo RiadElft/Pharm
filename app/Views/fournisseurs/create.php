@@ -67,7 +67,7 @@
                     <h1 class="text-2xl font-bold text-gray-800">Ajouter un Fournisseur</h1>
                 </div>
                 <div class="bg-white rounded-xl shadow p-6">
-                    <form action="/fournisseurs/store" method="post" class="space-y-4">
+                    <form action="/fournisseurs/create" method="post" class="space-y-4">
                         <div>
                             <label for="nom" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
                             <input type="text" id="nom" name="nom" required class="w-full rounded-lg border-gray-300 border p-2 focus:ring-2 focus:ring-[color:var(--pharmacy-green)] focus:border-transparent">
