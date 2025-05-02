@@ -199,7 +199,6 @@ class Vente extends BaseModel
             $query = "SELECT 
                         dv.*,
                         p.nom as produit_nom,
-                        p.code as produit_code,
                         (dv.quantite * dv.prix_unitaire) as sous_total
                       FROM details_vente dv
                       LEFT JOIN produits p ON dv.produit_id = p.id

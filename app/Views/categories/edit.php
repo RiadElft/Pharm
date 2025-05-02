@@ -15,7 +15,7 @@
     <!-- Sidebar -->
     <div id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-30 flex flex-col transition-transform duration-300 ease-in-out">
         <div class="flex items-center gap-3 px-6 py-6 border-b border-gray-100">
-            <img src="public/generated-image.png" alt="Pharmacy Logo" class="h-10 w-10 rounded-full bg-white border border-gray-200">
+            <img src="/public/generated-image.png" alt="Pharmacy Logo" class="h-10 w-10 rounded-full bg-white border border-gray-200">
             <span class="text-xl font-bold text-[color:var(--pharmacy-green,#3A8D2F)]">GreenLeaf</span>
         </div>
         <nav class="flex-1 px-4 py-6">
@@ -46,7 +46,7 @@
         <!-- Header -->
         <header class="flex items-center justify-between px-8 py-6 bg-white shadow-sm">
             <div class="flex items-center gap-3">
-                <img src="public/generated-image.png" alt="Pharmacy Logo" class="h-12 w-12 rounded-full bg-white border border-gray-200">
+                <img src="/public/generated-image.png" alt="Pharmacy Logo" class="h-12 w-12 rounded-full bg-white border border-gray-200">
                 <span class="text-2xl font-bold text-[color:var(--pharmacy-green)]">GreenLeaf Pharmacy</span>
             </div>
             <div class="flex items-center gap-4">
@@ -57,7 +57,14 @@
 
         <!-- Main Content -->
         <div class="px-8 py-6">
-            <?php /** @var array $category */ ?>
+            <?php 
+            /** @var array $data */
+            $category = $data['category'] ?? null;
+            if (!$category) {
+                echo '<div class="text-red-600">Erreur: Catégorie non trouvée</div>';
+                return;
+            }
+            ?>
             <div class="max-w-2xl mx-auto py-10">
                 <div class="flex items-center mb-6">
                     <a href="/categories" class="mr-2 text-gray-500 hover:text-[color:var(--pharmacy-green)]">
@@ -68,14 +75,14 @@
                     <h1 class="text-2xl font-bold text-gray-800">Modifier la Catégorie</h1>
                 </div>
                 <div class="bg-white rounded-xl shadow p-6">
-                    <form action="/categories/update/<?= $category['id'] ?>" method="post" class="space-y-4">
+                    <form action="/categories/update/<?= htmlspecialchars($category['id']) ?>" method="post" class="space-y-4">
                         <div>
                             <label for="nom" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
                             <input type="text" id="nom" name="nom" value="<?= htmlspecialchars($category['nom']) ?>" required class="w-full rounded-lg border-gray-300 border p-2 focus:ring-2 focus:ring-[color:var(--pharmacy-green)] focus:border-transparent">
                         </div>
                         <div>
                             <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                            <textarea id="description" name="description" rows="3" class="w-full rounded-lg border-gray-300 border p-2 focus:ring-2 focus:ring-[color:var(--pharmacy-green)] focus:border-transparent"><?= htmlspecialchars($category['description']) ?></textarea>
+                            <textarea id="description" name="description" rows="3" class="w-full rounded-lg border-gray-300 border p-2 focus:ring-2 focus:ring-[color:var(--pharmacy-green)] focus:border-transparent"><?= htmlspecialchars($category['description'] ?? '') ?></textarea>
                         </div>
                         <div class="flex justify-end pt-4">
                             <a href="/categories" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-full font-medium hover:bg-gray-200 transition mr-2">Annuler</a>

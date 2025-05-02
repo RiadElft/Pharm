@@ -228,6 +228,11 @@ try {
             $controller = new \App\Controllers\VenteController();
             $controller->create();
             break;
+        case (preg_match('/^ventes\/view\/(\d+)$/', $path, $matches) ? true : false):
+            error_log("ROUTER: Matched ventes/view/{id}. ID: " . $matches[1]);
+            $controller = new \App\Controllers\VenteController();
+            $controller->view((int)$matches[1]);
+            break;
         case (preg_match('/^ventes\/delete\/(\d+)$/', $path, $matches) ? true : false):
             $controller = new \App\Controllers\VenteController();
             $controller->delete((int)$matches[1]);
@@ -296,9 +301,8 @@ try {
             
         case 'debug/tables':
             try {
-                $db = new \App\Config\Database();
-                $conn = $db->getConnection();
-                $result = $conn->query('SHOW TABLES');
+                $dbInstance = \App\Config\Database::getInstance(); // Use the static getInstance method
+                $result = $dbInstance->query('SHOW TABLES');
                 echo "<h1>Database Tables</h1><pre>";
                 while ($row = $result->fetch()) {
                     echo $row[0] . "\n";

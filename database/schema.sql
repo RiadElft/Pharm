@@ -21,14 +21,19 @@ CREATE TABLE utilisateurs (
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
--- 3. Catégories d'articles
+-- 3. Catégories de produits
 CREATE TABLE categories (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(100) NOT NULL,
     description TEXT,
+    code VARCHAR(20) UNIQUE,
+    parent_id INT DEFAULT NULL,
+    niveau INT DEFAULT 1,
+    ordre INT DEFAULT 0,
     actif BOOLEAN DEFAULT TRUE,
     cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL
 );
 
 -- 4. Fournisseurs
@@ -44,25 +49,15 @@ CREATE TABLE fournisseurs (
     modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 5. Clients
-CREATE TABLE clients (
+-- 5. Produits
+CREATE TABLE produits (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(100) NOT NULL,
-    email VARCHAR(100),
-    telephone VARCHAR(20),
-    adresse TEXT,
-    actif BOOLEAN DEFAULT TRUE,
-    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- 6. Articles (Produits)
-CREATE TABLE articles (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nom VARCHAR(100) NOT NULL,
+    description TEXT,
     prix DECIMAL(10,2) NOT NULL,
     categorie_id INT NOT NULL,
     fournisseur_id INT NOT NULL,
+    seuil_alerte INT DEFAULT 10,
     actif BOOLEAN DEFAULT TRUE,
     cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -70,180 +65,83 @@ CREATE TABLE articles (
     FOREIGN KEY (fournisseur_id) REFERENCES fournisseurs(id)
 );
 
--- 7. Stock
+-- 6. Stock
 CREATE TABLE stock (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    article_id INT NOT NULL,
+    produit_id INT NOT NULL,
     quantite INT NOT NULL DEFAULT 0,
-    notes TEXT DEFAULT NULL,
-    date_dernier_mouvement TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    seuil_alerte INT DEFAULT 10,
-    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (article_id) REFERENCES articles(id)
+    date_derniere_entree DATE,
+    date_derniere_sortie DATE,
+    FOREIGN KEY (produit_id) REFERENCES produits(id)
 );
 
--- 7b. Mouvements de stock
-CREATE TABLE stock_mouvements (
+-- 7. Mouvements de stock
+CREATE TABLE mouvements_stock (
     id INT PRIMARY KEY AUTO_INCREMENT,
     produit_id INT NOT NULL,
     quantite INT NOT NULL,
     type_mouvement ENUM('entree', 'sortie') NOT NULL,
     date_mouvement TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    utilisateur_id INT,
-    reference_type VARCHAR(50),
-    reference_id INT,
+    utilisateur_id INT NOT NULL,
     notes TEXT,
-    FOREIGN KEY (produit_id) REFERENCES articles(id),
+    FOREIGN KEY (produit_id) REFERENCES produits(id),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id)
 );
 
--- 8. Commandes d'achat (bons de commande)
-CREATE TABLE commandes_achat (
+-- 8. Ventes
+CREATE TABLE ventes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    numero_vente VARCHAR(20) NOT NULL UNIQUE,
+    utilisateur_id INT NOT NULL,
+    date_vente TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    montant_total DECIMAL(10,2) NOT NULL,
+    montant_paye DECIMAL(10,2) NOT NULL,
+    montant_restant DECIMAL(10,2) GENERATED ALWAYS AS (montant_total - montant_paye) STORED,
+    statut ENUM('en_cours', 'terminee', 'annulee') DEFAULT 'en_cours',
+    notes TEXT,
+    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id)
+);
+
+-- 9. Détails des ventes
+CREATE TABLE details_vente (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    vente_id INT NOT NULL,
+    produit_id INT NOT NULL,
+    quantite INT NOT NULL,
+    prix_unitaire DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (vente_id) REFERENCES ventes(id),
+    FOREIGN KEY (produit_id) REFERENCES produits(id)
+);
+
+-- 10. Commandes fournisseurs
+CREATE TABLE commandes_fournisseur (
     id INT PRIMARY KEY AUTO_INCREMENT,
     fournisseur_id INT NOT NULL,
     utilisateur_id INT NOT NULL,
-    date_commande DATE NOT NULL,
-    statut ENUM('brouillon','envoyee','recue','annulee') DEFAULT 'brouillon',
+    date_commande TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    statut ENUM('en_cours', 'livree', 'annulee') DEFAULT 'en_cours',
+    montant_total DECIMAL(10,2) NOT NULL,
     notes TEXT,
-    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (fournisseur_id) REFERENCES fournisseurs(id),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id)
 );
 
--- 9. Détails des commandes d'achat
-CREATE TABLE details_commande_achat (
+-- 11. Détails des commandes fournisseurs
+CREATE TABLE details_commande_fournisseur (
     id INT PRIMARY KEY AUTO_INCREMENT,
     commande_id INT NOT NULL,
-    article_id INT NOT NULL,
+    produit_id INT NOT NULL,
     quantite INT NOT NULL,
     prix_unitaire DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (commande_id) REFERENCES commandes_achat(id),
-    FOREIGN KEY (article_id) REFERENCES articles(id)
+    FOREIGN KEY (commande_id) REFERENCES commandes_fournisseur(id),
+    FOREIGN KEY (produit_id) REFERENCES produits(id)
 );
 
--- 10. Ventes
-CREATE TABLE ventes (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    client_id INT,
-    utilisateur_id INT NOT NULL,
-    date_vente DATE NOT NULL,
-    montant_total DECIMAL(10,2) NOT NULL,
-    statut ENUM('terminee','annulee') DEFAULT 'terminee',
-    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (client_id) REFERENCES clients(id),
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id)
-);
-
--- 11. Détails des ventes
-CREATE TABLE details_vente (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    vente_id INT NOT NULL,
-    article_id INT NOT NULL,
-    quantite INT NOT NULL,
-    prix_unitaire DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (vente_id) REFERENCES ventes(id),
-    FOREIGN KEY (article_id) REFERENCES articles(id)
-);
-
--- 12. Paramètres généraux
-CREATE TABLE parametres (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    cle VARCHAR(100) NOT NULL UNIQUE,
-    valeur TEXT,
-    modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- 13. Permissions
-CREATE TABLE permissions (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nom VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT
-);
-
--- 14. Association rôles-permissions
-CREATE TABLE role_permissions (
-    role_id INT NOT NULL,
-    permission_id INT NOT NULL,
-    PRIMARY KEY (role_id, permission_id),
-    FOREIGN KEY (role_id) REFERENCES roles(id),
-    FOREIGN KEY (permission_id) REFERENCES permissions(id)
-);
-
--- 15. Association Produits-catégories (plusieurs-à-plusieurs)
-CREATE TABLE Produits_categories (
-    produit_id INT NOT NULL,
-    categorie_id INT NOT NULL,
-    PRIMARY KEY (produit_id, categorie_id),
-    FOREIGN KEY (produit_id) REFERENCES articles(id),
-    FOREIGN KEY (categorie_id) REFERENCES categories(id)
-);
-
--- 16. Association Produits-fournisseurs (plusieurs-à-plusieurs)
-CREATE TABLE Produits_fournisseurs (
-    produit_id INT NOT NULL,
-    fournisseur_id INT NOT NULL,
-    PRIMARY KEY (produit_id, fournisseur_id),
-    FOREIGN KEY (produit_id) REFERENCES articles(id),
-    FOREIGN KEY (fournisseur_id) REFERENCES fournisseurs(id)
-);
-
--- 17. Ajustements de stock
-CREATE TABLE ajustements_stock (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    stock_id INT NOT NULL,
-    utilisateur_id INT NOT NULL,
-    type_ajustement ENUM('ajout', 'retrait') NOT NULL,
-    quantite INT NOT NULL,
-    raison TEXT NOT NULL,
-    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (stock_id) REFERENCES stock(id),
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id)
-);
-
--- 18. Alertes
-CREATE TABLE alertes (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    type ENUM('stock_bas', 'expiration_proche', 'expire') NOT NULL,
-    produit_id INT NOT NULL,
-    stock_id INT,
-    message TEXT NOT NULL,
-    statut ENUM('nouveau', 'vu', 'resolu') DEFAULT 'nouveau',
-    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    resolu_le TIMESTAMP NULL,
-    FOREIGN KEY (produit_id) REFERENCES articles(id),
-    FOREIGN KEY (stock_id) REFERENCES stock(id)
-);
-
--- 19. Configuration des alertes
-CREATE TABLE configurations_alertes (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    type ENUM('stock_bas', 'expiration', 'rupture') NOT NULL,
-    seuil INT,
-    delai_notification INT,
-    notification_email BOOLEAN DEFAULT TRUE,
-    actif BOOLEAN DEFAULT TRUE,
-    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- 20. Logs d'audit
-CREATE TABLE logs_audit (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    utilisateur_id INT,
-    action VARCHAR(100) NOT NULL,
-    details TEXT,
-    adresse_ip VARCHAR(45),
-    user_agent TEXT,
-    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id)
-);
-
--- Index pour la performance
-CREATE INDEX idx_articles_nom ON articles(nom);
-CREATE INDEX idx_stock_article ON stock(article_id);
-CREATE INDEX idx_stock_fournisseur ON stock(article_id);
-CREATE INDEX idx_ventes_client ON ventes(client_id);
-CREATE INDEX idx_ventes_utilisateur ON ventes(utilisateur_id);
-CREATE INDEX idx_details_vente_vente ON details_vente(vente_id);
-CREATE INDEX idx_details_vente_article ON details_vente(article_id); 
+-- Index pour optimiser les performances
+CREATE INDEX idx_produits_nom ON produits(nom);
+CREATE INDEX idx_stock_produit ON stock(produit_id);
+CREATE INDEX idx_mouvements_stock_date ON mouvements_stock(date_mouvement);
+CREATE INDEX idx_ventes_date ON ventes(date_vente);
+CREATE INDEX idx_commandes_date ON commandes_fournisseur(date_commande); 

@@ -62,8 +62,8 @@ class CategorieController
     public function edit($id)
     {
         try {
-            $categorie = $this->categorieModel->findById($id);
-            if (!$categorie) {
+            $category = $this->categorieModel->findById($id);
+            if (!$category) {
                 $_SESSION['error'] = 'Catégorie non trouvée.';
                 header('Location: /categories');
                 exit;
@@ -88,6 +88,9 @@ class CategorieController
                 header('Location: /categories');
                 exit;
             }
+
+            // Pass the category data to the view
+            $data = ['category' => $category];
             require __DIR__ . '/../Views/categories/edit.php';
         } catch (PDOException $e) {
             $_SESSION['error'] = 'Une erreur est survenue lors de la modification de la catégorie.';
